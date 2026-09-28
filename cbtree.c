@@ -74,10 +74,10 @@ int cb_height(const CBTree *p)
 {
 	if (p->cb_len <= 0) return 0;
 	int h = 0;
-	int idx = 0;
-	while (idx < p->cb_len) {
+	int count = p->cb_len;
+	while (count > 0) {
 		h++;
-		idx = 2 * idx + 1;
+		count /= 2;
 	}
 	return h;
 }
@@ -94,8 +94,11 @@ int cb_sibling(const CBTree *p, int idx)
 	int l = 2 * parent + 1;
 	int r = 2 * parent + 2;
 
-	if (idx == l && r < p->cb_len) return r;
-	if (idx == r && l < p->cb_len) return l;
+	if (idx == l) {
+		if (r < p->cb_len) return r;
+	} else if (idx == r) {
+		if (l < p->cb_len) return l;
+	}
 	return -1;
 }
 
