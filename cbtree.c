@@ -16,6 +16,7 @@ void cb_push(CBTree *p, int x)
 */
 int cb_left(const CBTree *p, int idx)
 {
+	if (idx < 0 || idx >= p->cb_len) return -1;
 	int l = 2 * idx + 1;
 	if (l < p->cb_len)
 		return l;
@@ -28,6 +29,7 @@ int cb_left(const CBTree *p, int idx)
 */
 int cb_right(const CBTree *p, int idx)
 {
+	if (idx < 0 || idx >= p->cb_len) return -1;
 	int r = 2 * idx + 2;
 	if (r < p->cb_len)
 		return r;
@@ -70,12 +72,12 @@ void cb_ancestors(const CBTree *p, int idx)
 */
 int cb_height(const CBTree *p)
 {
-	if (p->cb_len == 0) return 0;
+	if (p->cb_len <= 0) return 0;
 	int h = 0;
-	int count = p->cb_len;
-	while (count > 0) {
+	int idx = 0;
+	while (idx < p->cb_len) {
 		h++;
-		count /= 2;
+		idx = 2 * idx + 1;
 	}
 	return h;
 }
@@ -92,11 +94,8 @@ int cb_sibling(const CBTree *p, int idx)
 	int l = 2 * parent + 1;
 	int r = 2 * parent + 2;
 
-	if (idx == l) {
-		if (r < p->cb_len) return r;
-	} else if (idx == r) {
-		if (l < p->cb_len) return l;
-	}
+	if (idx == l && r < p->cb_len) return r;
+	if (idx == r && l < p->cb_len) return l;
 	return -1;
 }
 
