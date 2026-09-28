@@ -5,7 +5,9 @@
 */
 void cb_push(CBTree *p, int x)
 {
-        /* Энд оруулах үйлдлийг хийнэ үү */
+	if (p->cb_len >= 100) return;
+	p->cb_arr[p->cb_len] = x;
+	p->cb_len++;
 }
 
 /*
@@ -14,7 +16,10 @@ void cb_push(CBTree *p, int x)
 */
 int cb_left(const CBTree *p, int idx)
 {
-        /* Энд зүүн хүүхдийн индексийг буцаах үйлдлийг хийнэ үү */
+	int l = 2 * idx + 1;
+	if (l < p->cb_len)
+		return l;
+	return -1;
 }
 
 /*
@@ -23,7 +28,10 @@ int cb_left(const CBTree *p, int idx)
 */
 int cb_right(const CBTree *p, int idx)
 {
-        /* Энд баруун хүүхдийн индексийг буцаах үйлдлийг хийнэ үү */
+	int r = 2 * idx + 2;
+	if (r < p->cb_len)
+		return r;
+	return -1;
 }
 
 /*
@@ -33,7 +41,12 @@ int cb_right(const CBTree *p, int idx)
 */
 int cb_search(const CBTree *p, int x)
 {
-        /* Энд хайх үйлдлийг хийнэ */	
+	int i;
+	for (i = 0; i < p->cb_len; i++) {
+		if (p->cb_arr[i] == x)
+			return i;
+	}
+	return -1;
 }
 
 /*
@@ -43,7 +56,13 @@ int cb_search(const CBTree *p, int x)
 */
 void cb_ancestors(const CBTree *p, int idx)
 {
-        /* Энд өвөг эцгийг олох үйлдлийг хийнэ үү */
+	if (idx <= 0 || idx >= p->cb_len) return;
+	int parent = (idx - 1) / 2;
+	while (parent >= 0) {
+		printf("%d\n", p->cb_arr[parent]);
+		if (parent == 0) break;
+		parent = (parent - 1) / 2;
+	}
 }
 
 /*
@@ -51,7 +70,14 @@ void cb_ancestors(const CBTree *p, int idx)
 */
 int cb_height(const CBTree *p)
 {
-        /* Энд өндрийг олох үйлдлийг хийнэ */
+	if (p->cb_len == 0) return 0;
+	int h = 0;
+	int count = p->cb_len;
+	while (count > 0) {
+		h++;
+		count /= 2;
+	}
+	return h;
 }
 
 /*
@@ -61,7 +87,17 @@ int cb_height(const CBTree *p)
 */
 int cb_sibling(const CBTree *p, int idx)
 {
-        /* Энд ах, дүүг олох үйлдлийг хийнэ үү */
+	if (idx <= 0 || idx >= p->cb_len) return -1;
+	int parent = (idx - 1) / 2;
+	int l = 2 * parent + 1;
+	int r = 2 * parent + 2;
+
+	if (idx == l) {
+		if (r < p->cb_len) return r;
+	} else if (idx == r) {
+		if (l < p->cb_len) return l;
+	}
+	return -1;
 }
 
 /*
@@ -70,7 +106,10 @@ int cb_sibling(const CBTree *p, int idx)
 */
 void cb_preorder(const CBTree *p, int idx)
 {
-        /* Энд pre-order-оор хэвлэх үйлдлийг хийнэ үү */
+	if (idx < 0 || idx >= p->cb_len) return;
+	printf("%d\n", p->cb_arr[idx]);
+	cb_preorder(p, cb_left(p, idx));
+	cb_preorder(p, cb_right(p, idx));
 }
 
 /*
@@ -79,7 +118,10 @@ void cb_preorder(const CBTree *p, int idx)
 */
 void cb_inorder(const CBTree *p, int idx)
 {
-        /* Энд in-order-оор хэвлэх үйлдлийг хийнэ үү */
+	if (idx < 0 || idx >= p->cb_len) return;
+	cb_inorder(p, cb_left(p, idx));
+	printf("%d\n", p->cb_arr[idx]);
+	cb_inorder(p, cb_right(p, idx));
 }
 
 /*
@@ -88,7 +130,10 @@ void cb_inorder(const CBTree *p, int idx)
  */
 void cb_postorder(const CBTree *p, int idx)
 {
-        /* Энд post-order-оор хэвлэх үйлдлийг хийнэ үү */
+	if (idx < 0 || idx >= p->cb_len) return;
+	cb_postorder(p, cb_left(p, idx));
+	cb_postorder(p, cb_right(p, idx));
+	printf("%d\n", p->cb_arr[idx]);
 }
 
 /*
@@ -98,7 +143,16 @@ void cb_postorder(const CBTree *p, int idx)
 */
 void cb_leaves(const CBTree *p, int idx)
 {
-        /* Энд навчуудыг үйлдлийг хийнэ үү */
+	if (idx < 0 || idx >= p->cb_len) return;
+	int l = cb_left(p, idx);
+	int r = cb_right(p, idx);
+
+	if (l == -1 && r == -1) {
+		printf("%d\n", p->cb_arr[idx]);
+		return;
+	}
+	if (l != -1) cb_leaves(p, l);
+	if (r != -1) cb_leaves(p, r);
 }
 
 /*
@@ -108,9 +162,13 @@ void cb_leaves(const CBTree *p, int idx)
 */
 void cb_descendants(const CBTree *p, int idx)
 {
-        /* Энд үр садыг олох үйлдлийг хийнэ үү */
-}
+	if (idx < 0 || idx >= p->cb_len) return;
+	int l = cb_left(p, idx);
+	int r = cb_right(p, idx);
 
+	if (l != -1) cb_preorder(p, l);
+	if (r != -1) cb_preorder(p, r);
+}
 
 /*
   p-ийн зааж буй Tree-д хэдэн элемент байгааг буцаана.
@@ -118,9 +176,8 @@ void cb_descendants(const CBTree *p, int idx)
 */
 int cb_size(const CBTree *p)
 {
-        /* Энд хэмжээг олох үйлдлийг хийнэ үү */	
+	return p->cb_len;
 }
-
 
 /*
   p-ийн зааж буй CBTree-д x утгаас үндэс хүртэлх оройнуудын тоог буцаана.
@@ -128,6 +185,13 @@ int cb_size(const CBTree *p)
 */
 int cb_level(const CBTree *p, int x)
 {
-        /* Энд түвшинг олох үйлдлийг хийнэ үү */
-}
+	int idx = cb_search(p, x);
+	if (idx == -1) return -1;
 
+	int level = 0;
+	while (idx > 0) {
+		level++;
+		idx = (idx - 1) / 2;
+	}
+	return level;
+}
